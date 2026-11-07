@@ -9,7 +9,7 @@ import plotly.express as px
 import streamlit as st
 from sqlalchemy import create_engine, text
 
-DB_URL = os.getenv("DB_URL", "postgresql+psycopg2://wifi:wifi123@localhost:5433/wifi_monitoring")
+DB_URL = st.secrets["DB_URL"]
 TZ = "Asia/Dili"
 TH = {"users": 30, "rssi": -75, "latency": 80, "loss": 3}
 BUILDING_COLORS = {"REK": "#2563eb", "AULA": "#06b6d4", "LAB": "#f59e0b",
