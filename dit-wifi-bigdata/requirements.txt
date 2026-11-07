@@ -1,0 +1,10 @@
+# Python >= 3.10 no Java 17 (ba Spark)
+confluent-kafka>=2.4
+psycopg2-binary>=2.9
+pyspark==3.5.1
+streamlit>=1.40
+plotly>=5.20
+pandas>=2.0
+sqlalchemy>=2.0
+numpy>=1.24
+pytest>=8.0

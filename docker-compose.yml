@@ -1,0 +1,61 @@
+# =====================================================================
+#  Infraestrutura Big Data ba projetu "University Wi-Fi Usage Monitoring"
+#  Servisu: Kafka (modu KRaft, la presiza Zookeeper), Kafka UI, PostgreSQL
+#  Hahú:  docker compose up -d
+#  Para:  docker compose down        (aumenta -v atu hamoos dadus hotu)
+# =====================================================================
+services:
+
+  # --- Apache Kafka: "sistema korreiu" ne'ebé simu no rai log Wi-Fi ---
+  kafka:
+    image: apache/kafka:3.8.0
+    container_name: kafka
+    ports:
+      - "9092:9092"            # porta ba aplikasaun iha laptop (host)
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      # Listener 3: interna (entre container), controller, no host (laptop)
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3                 # partisaun default → paralelizmu
+      KAFKA_LOG_RETENTION_HOURS: 168          # rai mensajen loron 7
+
+  # --- Kafka UI: web UI atu hatudu topic, mensajen no consumer lag (demo) ---
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"            # http://localhost:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: dit-wifi
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    depends_on:
+      - kafka
+
+  # --- PostgreSQL: storage ba raw events + rezultadu analitika ---
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: wifi
+      POSTGRES_PASSWORD: wifi123
+      POSTGRES_DB: wifi_monitoring
+      TZ: Asia/Dili
+    ports:
+      - "5433:5432"
+    volumes:
+      # schema.sql halai automatikamente dala uluk container hahú
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

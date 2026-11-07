@@ -1,0 +1,10 @@
+# Tema dashboard: kór tasi Dili (teal) + ámbar (sinal Wi-Fi)
+[theme]
+primaryColor = "#0E5E6F"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#EEF4F5"
+textColor = "#1B2B34"
+font = "sans serif"
+
+[server]
+headless = true
